@@ -2,15 +2,8 @@
 {
     partial class LauncherForm
     {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,186 +15,131 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LauncherForm));
-            label1 = new Label();
-            cbVersion = new ComboBox();
-            pbFiles = new ProgressBar();
-            pbProgress = new ProgressBar();
-            lbProgress = new Label();
-            btnStart = new Button();
-            usernameInput = new TextBox();
-            label2 = new Label();
-            minecraftVersion = new ComboBox();
-            characterPictureBox = new PictureBox();
-            label3 = new Label();
-            characterHelpPictureBox = new PictureBox();
-            ((System.ComponentModel.ISupportInitialize)characterPictureBox).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)characterHelpPictureBox).BeginInit();
-            SuspendLayout();
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(12, 53);
-            label1.Name = "label1";
-            label1.Size = new Size(82, 15);
-            label1.TabIndex = 0;
-            label1.Text = "Select version:";
-            // 
-            // cbVersion
-            // 
-            cbVersion.FormattingEnabled = true;
-            cbVersion.Location = new Point(12, 71);
-            cbVersion.Name = "cbVersion";
-            cbVersion.Size = new Size(147, 23);
-            cbVersion.TabIndex = 1;
-            cbVersion.TextChanged += cbVersion_TextChanged;
+            this.pbFiles = new System.Windows.Forms.ProgressBar();
+            this.pbProgress = new System.Windows.Forms.ProgressBar();
+            this.lbProgress = new System.Windows.Forms.Label();
+            this.btnStart = new System.Windows.Forms.Button();
+            this.usernameInput = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.lblStatus = new System.Windows.Forms.Label();
+            this.btnSettings = new System.Windows.Forms.Button();
+            this.SuspendLayout();
             // 
             // pbFiles
             // 
-            pbFiles.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            pbFiles.Location = new Point(12, 148);
-            pbFiles.Name = "pbFiles";
-            pbFiles.Size = new Size(380, 20);
-            pbFiles.TabIndex = 3;
+            this.pbFiles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbFiles.Location = new System.Drawing.Point(12, 148);
+            this.pbFiles.Name = "pbFiles";
+            this.pbFiles.Size = new System.Drawing.Size(380, 20);
+            this.pbFiles.TabIndex = 3;
             // 
             // pbProgress
             // 
-            pbProgress.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            pbProgress.Location = new Point(12, 177);
-            pbProgress.Name = "pbProgress";
-            pbProgress.Size = new Size(380, 20);
-            pbProgress.TabIndex = 4;
+            this.pbProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbProgress.Location = new System.Drawing.Point(12, 177);
+            this.pbProgress.Name = "pbProgress";
+            this.pbProgress.Size = new System.Drawing.Size(380, 20);
+            this.pbProgress.TabIndex = 4;
             // 
             // lbProgress
             // 
-            lbProgress.Location = new Point(12, 130);
-            lbProgress.Name = "lbProgress";
-            lbProgress.Size = new Size(293, 15);
-            lbProgress.TabIndex = 5;
+            this.lbProgress.Location = new System.Drawing.Point(12, 130);
+            this.lbProgress.Name = "lbProgress";
+            this.lbProgress.Size = new System.Drawing.Size(380, 15);
+            this.lbProgress.TabIndex = 5;
             // 
             // btnStart
             // 
-            btnStart.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            btnStart.Location = new Point(12, 100);
-            btnStart.Margin = new Padding(0);
-            btnStart.Name = "btnStart";
-            btnStart.Size = new Size(293, 25);
-            btnStart.TabIndex = 7;
-            btnStart.Text = "Launch";
-            btnStart.UseVisualStyleBackColor = true;
-            btnStart.Click += btnStart_Click;
+            this.btnStart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnStart.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.btnStart.Location = new System.Drawing.Point(12, 60);
+            this.btnStart.Margin = new System.Windows.Forms.Padding(0);
+            this.btnStart.Name = "btnStart";
+            this.btnStart.Size = new System.Drawing.Size(380, 50);
+            this.btnStart.TabIndex = 7;
+            this.btnStart.Text = "OYNA";
+            this.btnStart.UseVisualStyleBackColor = true;
+            this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             // 
             // usernameInput
             // 
-            usernameInput.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            usernameInput.Location = new Point(12, 27);
-            usernameInput.Name = "usernameInput";
-            usernameInput.Size = new Size(293, 23);
-            usernameInput.TabIndex = 9;
-            usernameInput.TextChanged += usernameInput_TextChanged;
+            this.usernameInput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.usernameInput.Location = new System.Drawing.Point(12, 27);
+            this.usernameInput.Name = "usernameInput";
+            this.usernameInput.Size = new System.Drawing.Size(293, 23);
+            this.usernameInput.TabIndex = 9;
+            this.usernameInput.TextChanged += new System.EventHandler(this.usernameInput_TextChanged);
             // 
             // label2
             // 
-            label2.AutoSize = true;
-            label2.Location = new Point(12, 9);
-            label2.Name = "label2";
-            label2.Size = new Size(63, 15);
-            label2.TabIndex = 8;
-            label2.Text = "Username:";
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 9);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(63, 15);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "Username:";
             // 
-            // minecraftVersion
+            // lblStatus
             // 
-            minecraftVersion.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            minecraftVersion.FormattingEnabled = true;
-            minecraftVersion.Items.AddRange(new object[] { "Releases and Installed", "All Versions" });
-            minecraftVersion.Location = new Point(165, 71);
-            minecraftVersion.Name = "minecraftVersion";
-            minecraftVersion.Size = new Size(140, 23);
-            minecraftVersion.TabIndex = 10;
-            minecraftVersion.Text = "Releases and Installed";
-            minecraftVersion.SelectedIndexChanged += minecraftVersion_SelectedIndexChanged;
+            this.lblStatus.AutoSize = true;
+            this.lblStatus.Location = new System.Drawing.Point(120, 9);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(100, 15);
+            this.lblStatus.TabIndex = 10;
+            this.lblStatus.Text = "Sunucu Durumu: ?";
             // 
-            // characterPictureBox
+            // btnSettings
             // 
-            characterPictureBox.BackColor = Color.Transparent;
-            characterPictureBox.Image = Properties.Resources.Steve_classic;
-            characterPictureBox.Location = new Point(311, 27);
-            characterPictureBox.Name = "characterPictureBox";
-            characterPictureBox.Size = new Size(81, 115);
-            characterPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-            characterPictureBox.TabIndex = 11;
-            characterPictureBox.TabStop = false;
-            characterPictureBox.Tag = "Steve classic";
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(311, 9);
-            label3.Name = "label3";
-            label3.Size = new Size(76, 15);
-            label3.TabIndex = 12;
-            label3.Text = "Skin preview:";
-            // 
-            // characterHelpPictureBox
-            // 
-            characterHelpPictureBox.Image = Properties.Resources.icon_info;
-            characterHelpPictureBox.Location = new Point(376, 27);
-            characterHelpPictureBox.Name = "characterHelpPictureBox";
-            characterHelpPictureBox.Size = new Size(16, 16);
-            characterHelpPictureBox.TabIndex = 13;
-            characterHelpPictureBox.TabStop = false;
-            characterHelpPictureBox.Tag = "The game will choose your offline skin from your username";
+            this.btnSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSettings.Location = new System.Drawing.Point(311, 27);
+            this.btnSettings.Name = "btnSettings";
+            this.btnSettings.Size = new System.Drawing.Size(81, 23);
+            this.btnSettings.TabIndex = 11;
+            this.btnSettings.Text = "Ayarlar";
+            this.btnSettings.UseVisualStyleBackColor = true;
+            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             // 
             // LauncherForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(404, 211);
-            Controls.Add(characterHelpPictureBox);
-            Controls.Add(label3);
-            Controls.Add(characterPictureBox);
-            Controls.Add(minecraftVersion);
-            Controls.Add(usernameInput);
-            Controls.Add(label2);
-            Controls.Add(btnStart);
-            Controls.Add(lbProgress);
-            Controls.Add(pbProgress);
-            Controls.Add(pbFiles);
-            Controls.Add(cbVersion);
-            Controls.Add(label1);
-            Icon = (Icon)resources.GetObject("$this.Icon");
-            MaximumSize = new Size(620, 250);
-            MinimumSize = new Size(420, 250);
-            Name = "LauncherForm";
-            StartPosition = FormStartPosition.CenterScreen;
-            Text = "Offline Minecraft Launcher";
-            Load += LauncherForm_Load;
-            ((System.ComponentModel.ISupportInitialize)characterPictureBox).EndInit();
-            ((System.ComponentModel.ISupportInitialize)characterHelpPictureBox).EndInit();
-            ResumeLayout(false);
-            PerformLayout();
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(404, 211);
+            this.Controls.Add(this.btnSettings);
+            this.Controls.Add(this.lblStatus);
+            this.Controls.Add(this.usernameInput);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.btnStart);
+            this.Controls.Add(this.lbProgress);
+            this.Controls.Add(this.pbProgress);
+            this.Controls.Add(this.pbFiles);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximumSize = new System.Drawing.Size(620, 250);
+            this.MinimumSize = new System.Drawing.Size(420, 250);
+            this.Name = "LauncherForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Royalnetwork Launcher";
+            this.Load += new System.EventHandler(this.LauncherForm_Load);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
         }
 
         #endregion
 
-        private Label label1;
-        private ComboBox cbVersion;
-        private ProgressBar pbFiles;
-        private ProgressBar pbProgress;
-        private Label lbProgress;
-        private Button btnStart;
-        private ComboBox minecraftVersion;
-        private TextBox usernameInput;
-        private Label label2;
-        private PictureBox characterPictureBox;
-        private Label label3;
-        private PictureBox characterHelpPictureBox;
+        private System.Windows.Forms.ProgressBar pbFiles;
+        private System.Windows.Forms.ProgressBar pbProgress;
+        private System.Windows.Forms.Label lbProgress;
+        private System.Windows.Forms.Button btnStart;
+        private System.Windows.Forms.TextBox usernameInput;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lblStatus;
+        private System.Windows.Forms.Button btnSettings;
     }
 }

@@ -1,0 +1,109 @@
+{
+  "config": "v3",
+  "Integrity": "Signed",
+  "Behavior": "Strict",
+  "Invalid signature kick message": "§cSunucumuza bağlandığınız istemci doğrulanmadı!§r\n§eDaha akıcı ve optimize bir oyun deneyimi için artık resmi launcher'ımızı kullanıyoruz.\n§bİndirmek için: §fhttps://royalnetwork.xyz",
+  "Kick Message": "§cLütfen sunucuya giriş yapmak için Royalnetwork Launcher kullanın.\n§bİndirmek için: §fhttps://royalnetwork.xyz",
+  "Missing mod message": "§cSunucumuza eksik mod veya farklı bir istemciyle giriş yapamazsınız!\n§eOptimizasyon ve sorunsuz oyun için lütfen resmi launcher'ımızı indirin.\n§bİndirmek için: §fhttps://royalnetwork.xyz",
+  "Missing required mod message": "§cEksik modlar tespit edildi: §f{mod}§r\n§eSunucumuz artık özel launcher kullanmaktadır. Lütfen optimize istemcimizi indirin.\n§bAdres: §fhttps://royalnetwork.xyz",
+  "Default Mode": "allowed",
+  "Mods": {
+    "hand-shaker": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "shulkerboxtooltip": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "packetfixer": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "krypton": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "fabric-renderer-api-v1": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "fabric-networking-api-v1": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "cloth-config": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "transition": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "fabric-transitive-access-wideners-v1": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "fabric-registry-sync-v0": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "fabric-message-api-v1": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "ferritecore": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "modmenu": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "appleskin": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "immediatelyfast": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "searchables": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "sodium-extra": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "controlling": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "entityculling": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "fabric-api": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "voicechat": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "sodium": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "voicechat_api": {
+      "mode": "required",
+      "action": "kick"
+    },
+    "lithium": {
+      "mode": "required",
+      "action": "kick"
+    }
+  },
+  "Ignored Mods": []
+}

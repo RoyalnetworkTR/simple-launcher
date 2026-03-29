@@ -1,0 +1,57 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="Royalnetwork Launcher" Manufacturer="Royalnetwork" Version="1.0.0.0" UpgradeCode="0d9f4c3a-12b5-41ef-bbd1-5f21f0088b90" Scope="perUser">
+    
+    <MajorUpgrade DowngradeErrorMessage="Daha yeni bir sürüm zaten yüklü." />
+    <!-- Media Template (Embed Cab inside MSI) -->
+    <MediaTemplate EmbedCab="yes" />
+    
+    <!-- Sadece kullanıcı seviyesinde kur -->
+    <Property Id="ALLUSERS" Value="2" />
+    <Property Id="MSIINSTALLPERUSER" Value="1" />
+
+    <!-- Yükleme Klasörü: %APPDATA%/.Royalnetwork/client -->
+    <StandardDirectory Id="AppDataFolder">
+      <Directory Id="RoyalnetworkDir" Name=".Royalnetwork">
+        <Directory Id="INSTALLFOLDER" Name="client">
+            <Component Id="MainExecutable" Guid="a42de92b-34a1-43ef-bde4-11e2f3d53b21">
+                <File Id="LauncherExe" Source="publish\OfflineMinecraftLauncher.exe" KeyPath="yes" />
+                <File Id="LauncherConfig" Source="publish\OfflineMinecraftLauncher.dll.config" />
+                <RegistryValue Root="HKCU" Key="Software\Royalnetwork\Launcher" Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" />
+            </Component>
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Başlat Menüsü Kısayolu -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="ApplicationShortcut" Guid="7cbbe8f9-4b6e-4cc4-b778-2cf99a19c5b2">
+        <Shortcut Id="ApplicationStartMenuShortcut" 
+                  Name="Royalnetwork Launcher" 
+                  Description="Royalnetwork Minecraft İstemcisi"
+                  Target="[#LauncherExe]"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="CleanUpShortCut" Directory="ProgramMenuFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\Royalnetwork\Launcher" Name="ShortcutCreated" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </StandardDirectory>
+    
+    <!-- Masaüstü Kısayolu -->
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="ApplicationDesktopShortcut" Guid="3cd91b7e-52f1-4fd3-89bd-831bd0962dc2">
+        <Shortcut Id="DesktopShortcut" 
+                  Name="Royalnetwork Launcher" 
+                  Description="Royalnetwork Minecraft İstemcisi"
+                  Target="[#LauncherExe]"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKCU" Key="Software\Royalnetwork\Launcher" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </StandardDirectory>
+
+    <Feature Id="Main">
+      <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="ApplicationDesktopShortcut" />
+    </Feature>
+
+  </Package>
+</Wix>

@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
@@ -6,6 +6,21 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Version" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Uuid" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="MaxRamMb" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4096</Value>
+    </Setting>
+    <Setting Name="MinRamMb" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1024</Value>
+    </Setting>
+    <Setting Name="JavaPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="JvmArguments" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>
