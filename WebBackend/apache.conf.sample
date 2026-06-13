@@ -28,6 +28,11 @@
     # Skin/dosya yüklemeleri için makul gövde sınırı (skinler ufak; 50M bol bol yeter).
     LimitRequestBody 52428800
 
+    # vhost seviyesinde rewrite: certbot --redirect'in eklediği HTTP->HTTPS
+    # kuralı bu olmadan çalışmaz (mod_rewrite her bağlamda ayrı açılır; aşağıdaki
+    # <Directory> içindeki RewriteEngine On front-controller içindir, vhost'u kapsamaz).
+    RewriteEngine On
+
     <Directory /var/www/html/public>
         Options -Indexes +FollowSymLinks
         # Her şeyi vhost içine yazdığımız için .htaccess'e gerek yok (daha hızlı).

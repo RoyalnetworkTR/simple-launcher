@@ -3,9 +3,19 @@
 # Route every request that does not map to a real file/directory to the
 # front controller (index.php). DocumentRoot must point at this directory
 # (WebBackend/public).
+#
+# NOT: deploy-apache.sh / apache.conf.sample kurulumlarında her şey vhost
+# içinde tanımlıdır (AllowOverride None) ve bu dosya OKUNMAZ. Bu .htaccess
+# yalnızca paylaşımlı hosting gibi vhost'a erişemediğiniz ortamlar içindir.
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # KRİTİK: Bearer JWT (Authorization başlığı) PHP'ye geçsin. Apache/PHP-FPM
+    # bu başlığı varsayılan olarak düşürür; launcher'ın korumalı uçları (JWT)
+    # aksi halde 401 döner.
+    RewriteCond %{HTTP:Authorization} ^(.+)$
+    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%1]
 
     # Serve existing files and directories directly.
     RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -19,4 +29,9 @@
 # Do not allow directory listings.
 <IfModule mod_autoindex.c>
     Options -Indexes
+</IfModule>
+
+# Defans-derinliği: backend iç dizinleri public içine taşınsa bile servis edilmesin.
+<IfModule mod_alias.c>
+    RedirectMatch 404 "(?i)^/(data|seed|src|cli)(/|$)"
 </IfModule>

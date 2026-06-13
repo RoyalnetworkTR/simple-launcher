@@ -19,7 +19,7 @@
 set -euo pipefail
 
 DOMAIN="oyna.athenastudios.com.tr"
-WEBROOT="/var/www/html"
+WEBROOT="${WEBROOT:-/var/www/html}"   # WEBROOT=/var/www/athena bash deploy-apache.sh ile değiştirilebilir
 PUBLIC="$WEBROOT/public"
 MODS_SRC="/home/athena/Desktop/RP/mods"
 CERT_EMAIL="${CERT_EMAIL:-admin@athenastudios.com.tr}"   # certbot bildirimleri için
@@ -32,8 +32,11 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y apache2 php-fpm php-sqlite3 php-curl php-mbstring php-zip php-gd certbot python3-certbot-apache ufw rsync openssl
 
-# PHP-FPM sürüm/sock tespiti
-PHP_FPM_SOCK="$(ls /run/php/php*-fpm.sock 2>/dev/null | head -n1 || true)"
+# PHP-FPM sürüm/sock tespiti — SÜRÜMLÜ sokete öncelik ver (php8.4-fpm.sock),
+# çünkü /run/php/php-fpm.sock genel symlink'i alfabetik olarak önce gelir ve
+# basename'i "php-fpm" olur (a2enconf php-fpm DİYE bir conf yoktur, eşleşmez).
+PHP_FPM_SOCK="$(ls /run/php/php*-fpm.sock 2>/dev/null | grep -E 'php[0-9]' | sort -V | tail -n1 || true)"
+[ -z "$PHP_FPM_SOCK" ] && PHP_FPM_SOCK="$(ls /run/php/php*-fpm.sock 2>/dev/null | head -n1 || true)"
 if [ -z "$PHP_FPM_SOCK" ]; then echo "PHP-FPM soketi bulunamadı!"; exit 1; fi
 PHP_FPM_CONF="$(basename "$PHP_FPM_SOCK" .sock)"   # ör: php8.4-fpm
 echo "   PHP-FPM soketi: $PHP_FPM_SOCK  (conf: $PHP_FPM_CONF)"
@@ -110,6 +113,10 @@ cat > /etc/apache2/sites-available/athena.conf <<APACHE
 
     DocumentRoot $PUBLIC
     LimitRequestBody 52428800
+
+    # vhost seviyesinde rewrite: certbot --redirect'in eklediği HTTP->HTTPS
+    # kuralı bu olmadan çalışmaz (mod_rewrite her bağlamda ayrı açılır).
+    RewriteEngine On
 
     <Directory $PUBLIC>
         Options -Indexes +FollowSymLinks
