@@ -31,7 +31,11 @@ compileJava {
 }
 
 minecraft {
-    version = '1.12.2-14.23.5.2860'
+    // Build against 14.23.5.2847: it is the 1.12.2 Forge build whose "userdev"
+    // artifact is still published on maven.minecraftforge.net (2854/2860 were
+    // republished as "userdev3" only, which FG 2.3 cannot consume). The mod is
+    // binary-compatible and runs fine on any 14.23.5.x server (e.g. 2860).
+    version = '1.12.2-14.23.5.2847'
     runDir = 'run'
     mappings = 'stable_39'
 }
