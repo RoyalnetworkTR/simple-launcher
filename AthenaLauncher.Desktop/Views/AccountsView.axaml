@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OfflineMinecraftLauncher.Views.AccountsView">
+    <ScrollViewer>
+        <StackPanel Spacing="16" MaxWidth="760">
+            <TextBlock Text="Hesaplar" Classes="title" />
+            <TextBlock x:Name="CapLabel" Classes="muted" />
+
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Yeni Minecraft hesabı ekle" FontWeight="SemiBold" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox x:Name="NewName" Watermark="Kullanıcı adı (3-16; harf, rakam, _)" />
+                        <Button x:Name="AddButton" Grid.Column="1" Classes="accent" Content="Ekle" Margin="8,0,0,0" Click="OnAdd" />
+                    </Grid>
+                    <TextBlock x:Name="AddStatus" Classes="muted" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="Skin modeli:" Classes="muted" VerticalAlignment="Center" />
+                <ComboBox x:Name="SkinModel" SelectedIndex="0" Width="150">
+                    <ComboBoxItem>Classic</ComboBoxItem>
+                    <ComboBoxItem>Slim</ComboBoxItem>
+                </ComboBox>
+                <TextBlock Text="(skin yüklemeden önce seç)" Classes="muted" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel x:Name="AccountList" Spacing="10" />
+            <TextBlock x:Name="Empty" Classes="muted" Text="Yükleniyor..." />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

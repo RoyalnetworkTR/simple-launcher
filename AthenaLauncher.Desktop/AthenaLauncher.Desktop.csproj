@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RootNamespace>OfflineMinecraftLauncher</RootNamespace>
+    <AssemblyName>AthenaStudiosLauncher</AssemblyName>
+    <Product>Athena Studios Launcher</Product>
+    <AssemblyTitle>Athena Studios Launcher</AssemblyTitle>
+    <Company>Athena Studios</Company>
+    <Version>2.0.0</Version>
+    <ApplicationIcon>..\minecraft.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Views are instantiated in code (with service args), not via the runtime XAML
+         loader, so the "no public constructor" runtime-loader warning is expected. -->
+    <NoWarn>$(NoWarn);AVLN3001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.2.3" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="CmlLib.Core" Version="4.0.6" />
+    <PackageReference Include="CmlLib.Core.Installer.Forge" Version="1.1.1" />
+    <PackageReference Include="CmlLib.Core.Installer.NeoForge" Version="4.0.0" />
+  </ItemGroup>
+
+  <!-- Reuse the portable, UI-agnostic pieces of the WPF launcher. -->
+  <ItemGroup>
+    <Compile Include="..\AppConfig.cs" Link="Shared\AppConfig.cs" />
+    <Compile Include="..\Character.cs" Link="Shared\Character.cs" />
+    <Compile Include="..\PackageManager.cs" Link="Shared\PackageManager.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+</Project>

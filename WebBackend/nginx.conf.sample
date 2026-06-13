@@ -1,0 +1,57 @@
+# Athena Studios Launcher - nginx + php-fpm server block (sample)
+#
+# Adjust:
+#   - server_name      -> launcher.athenastudios.com.tr
+#   - root             -> absolute path to WebBackend/public
+#   - fastcgi_pass     -> your php-fpm socket/address (PHP 8.4)
+#
+# Front-controller pattern: every request that is not a real file is handed
+# to public/index.php, which does the routing internally.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name launcher.athenastudios.com.tr;
+
+    # IMPORTANT: point this at WebBackend/public (NOT WebBackend itself).
+    root /var/www/athena/WebBackend/public;
+    index index.php;
+
+    # Reasonable upload/body size for raw client files served via /files/.
+    client_max_body_size 256M;
+
+    # Never expose the data/ or seed/ directories over the web.
+    location ~ /(data|seed|src|cli)/ {
+        deny all;
+        return 404;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        # Pass the Authorization header so PHP sees the launcher's Bearer JWT.
+        fastcgi_param HTTP_AUTHORIZATION $http_authorization;
+
+        # Use ONE of the following (socket OR tcp) to match your php-fpm setup:
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+        # fastcgi_pass 127.0.0.1:9000;
+
+        fastcgi_read_timeout 30s;
+    }
+}
+
+# For production, terminate TLS (HTTPS) here or via a reverse proxy.
+# Example with certbot-managed certificates:
+#
+# server {
+#     listen 443 ssl http2;
+#     server_name launcher.athenastudios.com.tr;
+#     root /var/www/athena/WebBackend/public;
+#     ssl_certificate     /etc/letsencrypt/live/launcher.athenastudios.com.tr/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/launcher.athenastudios.com.tr/privkey.pem;
+#     ... (same location blocks as above) ...
+# }

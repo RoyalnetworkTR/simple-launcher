@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OfflineMinecraftLauncher.Views.LoginView">
+    <Border Background="{StaticResource HeroGradient}">
+        <Border Classes="card" Width="430" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="28">
+            <StackPanel Spacing="16" HorizontalAlignment="Center">
+                <Image Source="avares://AthenaStudiosLauncher/Assets/logo.png" Width="96" Height="96" />
+                <TextBlock Text="Athena Studios" Classes="title" HorizontalAlignment="Center" />
+                <TextBlock Text="Oynamak için Discord hesabınla giriş yap."
+                           Classes="muted" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+                <Button x:Name="LoginButton" Classes="accent" Content="Discord ile Giriş"
+                        HorizontalAlignment="Stretch" Click="OnLogin" />
+                <ProgressBar x:Name="Spinner" IsIndeterminate="True" Width="240" IsVisible="False" />
+                <TextBlock x:Name="StatusText" Classes="muted" HorizontalAlignment="Center"
+                           TextAlignment="Center" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+    </Border>
+</UserControl>

@@ -1,0 +1,65 @@
+name: AthenaCore Mod (Forge 1.12.2)
+
+# AthenaCore sunucu+istemci modunu CI'da derler.
+# - "v1.0.0" gibi bir tag push'larsanız jar derlenir ve Release'e eklenir.
+# - Actions'tan elle de tetiklenebilir (workflow_dispatch) -> artifact olarak iner.
+# Toolchain: JDK 8 + Gradle 4.10.3 + ForgeGradle 2.3 (1.12.2 için tek geçerli kombinasyon).
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AthenaCore
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: JDK 8 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Gradle 4.10.3 kur
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '4.10.3'
+
+      - name: Modu derle
+        run: gradle build --no-daemon --stacktrace
+
+      - name: Jar'ı topla
+        run: |
+          mkdir -p out
+          JAR=$(find build/libs -name 'athenacore*.jar' ! -name '*-sources.jar' ! -name '*-dev.jar' | head -n1)
+          echo "Bulunan jar: $JAR"
+          cp "$JAR" out/athenacore.jar
+
+      - name: Artifact olarak yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: athenacore-mod
+          path: AthenaCore/out/athenacore.jar
+          if-no-files-found: error
+
+      - name: Otomatik Release (yalnız tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: AthenaCore/out/athenacore.jar
+          body: |
+            AthenaCore (Forge 1.12.2) — otomatik derlenmiş mod.
+            Kurulum: jar'ı modpack (WebBackend/files/mods/) ve oyun sunucusu mods/ klasörüne koyun.
+            Sunucuda ATHENA_SERVER_KEY ortam değişkenini backend ile aynı değere ayarlayın.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

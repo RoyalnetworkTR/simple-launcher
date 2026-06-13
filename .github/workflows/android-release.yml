@@ -1,0 +1,77 @@
+name: Athena Mobile APK (otomatik release)
+
+# Telefon launcher'ını (AndroidLauncher/) CI'da derler ve otomatik release eder.
+# - "v1.0.0" gibi bir etiket (tag) push'larsanız: APK derlenir ve o etikete Release olarak eklenir.
+# - Actions sekmesinden elle de tetikleyebilirsiniz (workflow_dispatch).
+#
+# Yerel Android SDK gerektirmez; her şeyi GitHub runner'ı yapar.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release etiketi (örn. v1.0.0)'
+        required: false
+        default: 'mobile-latest'
+
+permissions:
+  contents: write   # Release oluşturmak için
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AndroidLauncher
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: JDK 17 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK kur
+        uses: android-actions/setup-android@v3
+
+      - name: Gradle kur
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: APK derle (debug)
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: APK'yı yeniden adlandır
+        run: |
+          mkdir -p out
+          APK=$(find app/build/outputs/apk -name '*.apk' | head -n1)
+          echo "Bulunan APK: $APK"
+          cp "$APK" "out/AthenaStudiosLauncher-mobile.apk"
+
+      - name: Artifact olarak yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: AthenaStudiosLauncher-mobile-apk
+          path: AndroidLauncher/out/AthenaStudiosLauncher-mobile.apk
+          if-no-files-found: error
+
+      - name: Otomatik Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || inputs.release_tag }}
+          name: Athena Mobile ${{ github.ref_type == 'tag' && github.ref_name || inputs.release_tag }}
+          body: |
+            Athena Studios Launcher (Mobil) — otomatik derlenmiş APK.
+            Kurulum: APK'yı indirin, "Bilinmeyen kaynaklar"a izin verip kurun.
+            Yalnızca Athena modpack'ini (1.12.2 Forge) yükler ve oyna.athenastudios.com.tr'ye bağlanır.
+          files: AndroidLauncher/out/AthenaStudiosLauncher-mobile.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

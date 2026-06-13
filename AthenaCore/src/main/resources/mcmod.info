@@ -1,0 +1,13 @@
+[
+  {
+    "modid": "athenacore",
+    "name": "AthenaCore",
+    "description": "Athena Studios: Athena Launcher giriş doğrulaması, özel skin sistemi ve ban entegrasyonu. Sunucu offline-mode kalır; yalnızca launcher'dan doğrulanmış, banlı olmayan hesaplar oyuna girebilir.",
+    "version": "1.0.0",
+    "mcversion": "1.12.2",
+    "url": "https://athenastudios.com.tr",
+    "authorList": ["Athena Studios"],
+    "credits": "Athena Studios",
+    "logoFile": ""
+  }
+]

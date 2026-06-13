@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Athena "A" -->
+    <path
+        android:fillColor="#3B82F6"
+        android:fillType="evenOdd"
+        android:pathData="M54,30 L74,82 L63.5,82 L59.5,71 L48.5,71 L44.5,82 L34,82 Z M51,62 L57,62 L54,48 Z" />
+    <!-- swoosh -->
+    <path
+        android:fillColor="#58A6FF"
+        android:pathData="M50,66 C58,60 66,57 74,57 C66,61 60,64 54,69 Z" />
+</vector>

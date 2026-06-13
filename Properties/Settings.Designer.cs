@@ -73,7 +73,7 @@ namespace OfflineMinecraftLauncher.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1024")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2048")]
         public int MinRamMb {
             get {
                 return ((int)(this["MinRamMb"]));
@@ -104,6 +104,18 @@ namespace OfflineMinecraftLauncher.Properties {
             }
             set {
                 this["JvmArguments"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EnabledOptionalMods {
+            get {
+                return ((string)(this["EnabledOptionalMods"]));
+            }
+            set {
+                this["EnabledOptionalMods"] = value;
             }
         }
     }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="athena_bg">#FF0E1116</color>
+    <color name="athena_titlebar">#FF0B0E13</color>
+    <color name="athena_accent">#FF2F81F7</color>
+</resources>

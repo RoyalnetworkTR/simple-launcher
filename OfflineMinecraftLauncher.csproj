@@ -1,43 +1,50 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>minecraft.ico</ApplicationIcon>
+    <Product>Athena Studios Launcher</Product>
+    <AssemblyTitle>Athena Studios Launcher</AssemblyTitle>
+    <Company>Athena Studios</Company>
+    <Version>2.0.0</Version>
+    <RootNamespace>OfflineMinecraftLauncher</RootNamespace>
+    <!-- The cross-platform Avalonia launcher is a separate project; keep its sources
+         out of this (Windows-only WPF) build. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);AthenaLauncher.Desktop\**</DefaultItemExcludes>
+    <!-- Tek-dosya publish'te WPF yerel kitaplıklarını da exe içine göm (installer yalnızca exe+config kurar) -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="minecraft.ico" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CmlLib.Core" Version="4.0.6" />
     <PackageReference Include="CmlLib.Core.Installer.Forge" Version="1.1.1" />
     <PackageReference Include="CmlLib.Core.Installer.NeoForge" Version="4.0.0" />
     <PackageReference Include="System.Management" Version="10.0.5" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- Brand + skin assets compiled into the exe (pack URIs, single-file friendly) -->
+  <ItemGroup>
+    <Resource Include="minecraft.ico" />
+    <Resource Include="images\athbanner.png" />
+    <Resource Include="images\athlogonoback.png" />
+    <Resource Include="images\ath project.png" />
+    <Resource Include="images\logogif.gif" />
+    <Resource Include="Resources\*_classic.png" />
+    <Resource Include="Resources\*_slim.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

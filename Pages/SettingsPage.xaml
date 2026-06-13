@@ -1,0 +1,68 @@
+<UserControl x:Class="OfflineMinecraftLauncher.Pages.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24,28,24">
+            <TextBlock Text="Ayarlar" FontSize="24" FontWeight="Bold" Margin="0,0,0,16"/>
+
+            <!-- RAM -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="BELLEK (RAM)" FontSize="11" Foreground="{StaticResource TextMutedBrush}"/>
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Maksimum RAM" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" x:Name="MaxRamLabel" Text="4096 MB" FontWeight="SemiBold" Foreground="{StaticResource AccentGlowBrush}"/>
+                    </Grid>
+                    <Slider x:Name="MaxRamSlider" Style="{StaticResource BrandSlider}" Minimum="1024" Maximum="32768" TickFrequency="512" IsSnapToTickEnabled="True" Margin="0,6,0,14" ValueChanged="MaxRamSlider_ValueChanged"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Minimum RAM" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" x:Name="MinRamLabel" Text="2048 MB" FontWeight="SemiBold" Foreground="{StaticResource AccentGlowBrush}"/>
+                    </Grid>
+                    <Slider x:Name="MinRamSlider" Style="{StaticResource BrandSlider}" Minimum="512" Maximum="16384" TickFrequency="512" IsSnapToTickEnabled="True" Margin="0,6,0,0" ValueChanged="MinRamSlider_ValueChanged"/>
+                    <TextBlock x:Name="RamHint" Text="" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Java -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="JAVA" FontSize="11" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="Özel Java yolu (boş bırakılırsa otomatik bulunur)" Foreground="{StaticResource TextMutedBrush}" FontSize="12" Margin="0,6,0,8"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBox x:Name="JavaBox" Style="{StaticResource BrandTextBox}"/>
+                        <Button Grid.Column="1" Content="Gözat" Style="{StaticResource GhostButton}" Margin="8,0,0,0" Click="Browse_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- JVM -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="JVM ARGÜMANLARI" FontSize="11" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBox x:Name="JvmBox" Style="{StaticResource BrandTextBox}" Margin="0,8,0,8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Performans ön ayarı" Style="{StaticResource GhostButton}" Margin="0,0,8,0" Click="PerfPreset_Click"/>
+                        <Button Content="Temizle" Style="{StaticResource GhostButton}" Click="ClearJvm_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Maintenance -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="BAKIM" FontSize="11" Foreground="{StaticResource TextMutedBrush}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="📂 Oyun klasörünü aç" Style="{StaticResource GhostButton}" Margin="0,0,8,0" Click="OpenFolder_Click"/>
+                        <Button Content="🧹 Önbelleği temizle" Style="{StaticResource GhostButton}" Click="ClearCache_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Button Content="Kaydet" Style="{StaticResource AccentButton}" Height="46" Width="160" HorizontalAlignment="Left" Click="Save_Click"/>
+            <TextBlock x:Name="SavedHint" Text="" Foreground="{StaticResource SuccessBrush}" FontSize="12" Margin="2,10,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

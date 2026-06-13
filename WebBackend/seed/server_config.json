@@ -1,0 +1,10 @@
+{
+    "ServerIp": "oyna.athenastudios.com.tr",
+    "AutoConnect": true,
+    "MinecraftVersion": "1.12.2",
+    "LoaderType": "Forge",
+    "LoaderVersion": "14.23.5.2860",
+    "MaxRamMb": 4096,
+    "MinRamMb": 2048,
+    "JavaPath": ""
+}

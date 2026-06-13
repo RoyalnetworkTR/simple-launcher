@@ -1,0 +1,22 @@
+# Athena Studios Launcher - Apache front-controller routing
+#
+# Route every request that does not map to a real file/directory to the
+# front controller (index.php). DocumentRoot must point at this directory
+# (WebBackend/public).
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Serve existing files and directories directly.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Everything else -> front controller.
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Do not allow directory listings.
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>

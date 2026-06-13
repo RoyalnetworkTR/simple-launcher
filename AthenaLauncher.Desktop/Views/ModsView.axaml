@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OfflineMinecraftLauncher.Views.ModsView">
+    <ScrollViewer>
+        <StackPanel Spacing="14" MaxWidth="760">
+            <TextBlock Text="İsteğe Bağlı Modlar" Classes="title" />
+            <TextBlock Classes="muted"
+                       Text="Açtığın modlar oyuna eklenir. Zorunlu (anti-cheat) modlar her zaman yüklüdür." />
+            <StackPanel x:Name="List" Spacing="10" />
+            <TextBlock x:Name="Empty" Classes="muted" Text="Yükleniyor..." />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

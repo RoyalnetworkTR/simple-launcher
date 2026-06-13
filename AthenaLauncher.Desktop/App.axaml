@@ -1,0 +1,107 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OfflineMinecraftLauncher.App"
+             RequestedThemeVariant="Dark">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://AthenaStudiosLauncher/Theme/Brand.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+
+        <!-- Accent (primary) button -->
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="18,11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource AccentGlowBrush}" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.accent:disabled /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource BorderBrush}" />
+        </Style>
+
+        <!-- Ghost (secondary) button -->
+        <Style Selector="Button.ghost">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="14,9" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource Surface2Brush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+        </Style>
+
+        <!-- Danger button -->
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <!-- Card container -->
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="18" />
+        </Style>
+
+        <!-- Text helpers -->
+        <Style Selector="TextBlock.title">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        </Style>
+        <Style Selector="TextBlock.muted">
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+
+        <!-- Sidebar nav buttons -->
+        <Style Selector="Button.nav">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="14,11" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource Surface2Brush}" />
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        </Style>
+        <Style Selector="Button.nav.active">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.nav.active /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+        </Style>
+
+        <!-- Inputs -->
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+    </Application.Styles>
+</Application>

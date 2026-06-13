@@ -1,0 +1,65 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="OfflineMinecraftLauncher.Views.MainWindow"
+        Title="Athena Studios Launcher"
+        Width="980" Height="640"
+        MinWidth="860" MinHeight="580"
+        Background="{StaticResource BgBrush}"
+        Foreground="{StaticResource TextBrush}">
+    <Grid>
+        <!-- Main shell (visible once logged in) -->
+        <Grid x:Name="Shell" ColumnDefinitions="230,*" IsVisible="False">
+            <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+                <DockPanel Margin="14">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="4,8,4,20">
+                        <Image Source="avares://AthenaStudiosLauncher/Assets/logo.png" Width="42" Height="42" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="ATHENA STUDIOS" FontWeight="Bold" FontSize="13" />
+                            <TextBlock Text="1.12.2 Forge" Classes="muted" FontSize="11" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Bottom" Spacing="6">
+                        <Button Classes="ghost" Content="Discord" HorizontalAlignment="Stretch" Click="OnOpenDiscord" />
+                        <Button Classes="ghost" Content="Çıkış Yap" HorizontalAlignment="Stretch" Click="OnLogout" />
+                        <TextBlock Text="v2.0.0" Classes="muted" HorizontalAlignment="Center" Margin="0,8,0,0" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <Button x:Name="NavHome" Classes="nav" Content="🏠   Oyna" Tag="home" Click="OnNav" />
+                        <Button x:Name="NavAccounts" Classes="nav" Content="👤   Hesaplar" Tag="accounts" Click="OnNav" />
+                        <Button x:Name="NavMods" Classes="nav" Content="🧩   Modlar" Tag="mods" Click="OnNav" />
+                        <Button x:Name="NavNews" Classes="nav" Content="📰   Haberler" Tag="news" Click="OnNav" />
+                        <Button x:Name="NavSettings" Classes="nav" Content="⚙️   Ayarlar" Tag="settings" Click="OnNav" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <Border Grid.Column="1" Background="{StaticResource HeroGradient}">
+                <ContentControl x:Name="PageHost" Margin="24" />
+            </Border>
+        </Grid>
+
+        <!-- Login overlay -->
+        <ContentControl x:Name="LoginHost" IsVisible="False" />
+
+        <!-- Loading overlay -->
+        <Border x:Name="LoadingOverlay" Background="{StaticResource BgBrush}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+                <Image Source="avares://AthenaStudiosLauncher/Assets/logo.png" Width="76" Height="76" />
+                <TextBlock x:Name="LoadingText" Text="Yükleniyor..." Classes="muted" HorizontalAlignment="Center" />
+                <ProgressBar IsIndeterminate="True" Width="240" />
+            </StackPanel>
+        </Border>
+
+        <!-- Ban overlay -->
+        <Border x:Name="BanOverlay" Background="#FF1A0E10" IsVisible="False">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" MaxWidth="440">
+                <TextBlock Text="⛔ Erişim Engellendi" FontSize="24" FontWeight="Bold"
+                           Foreground="{StaticResource DangerBrush}" HorizontalAlignment="Center" />
+                <TextBlock x:Name="BanReason" Classes="muted" TextWrapping="Wrap" TextAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

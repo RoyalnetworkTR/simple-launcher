@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OfflineMinecraftLauncher.Views.SettingsView">
+    <ScrollViewer>
+        <StackPanel Spacing="16" MaxWidth="640">
+            <TextBlock Text="Ayarlar" Classes="title" />
+
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Bellek (RAM)" FontWeight="SemiBold" />
+                    <TextBlock x:Name="MaxLabel" Classes="muted" />
+                    <Slider x:Name="MaxSlider" Minimum="1024" Maximum="32768" />
+                    <TextBlock x:Name="MinLabel" Classes="muted" />
+                    <Slider x:Name="MinSlider" Minimum="512" Maximum="16384" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Java" FontWeight="SemiBold" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox x:Name="JavaBox" Watermark="(boş bırakılırsa otomatik bulunur)" />
+                        <Button Grid.Column="1" Classes="ghost" Content="Gözat" Margin="8,0,0,0" Click="OnBrowseJava" />
+                    </Grid>
+                    <TextBlock Text="JVM Argümanları" FontWeight="SemiBold" />
+                    <TextBox x:Name="JvmBox" />
+                    <Button Classes="ghost" Content="Performans Önayarı" Click="OnPreset" HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button Classes="accent" Content="Kaydet" Click="OnSave" />
+                <TextBlock x:Name="SaveStatus" Classes="muted" VerticalAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

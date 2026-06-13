@@ -1,0 +1,49 @@
+// AthenaCore - Forge 1.12.2 mod (auth verification + custom skins + ban enforcement).
+// Toolchain: JDK 8 + ForgeGradle 2.3 + Gradle 4.10.3 (the only combo that builds 1.12.2).
+// Built in CI (.github/workflows/athenacore-mod.yml). If the FG 2.3 snapshot cannot be
+// resolved from the Forge maven, switch the classpath to the maintained mirror:
+//   classpath 'com.anatawa12.forge:ForgeGradle:2.3-1.0.+'  (repo: https://maven.anatawa12.com/)
+
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://maven.anatawa12.com/' } // fallback mirror for FG 2.3
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '2.3-SNAPSHOT', changing: true
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+version = '1.0.0'
+group = 'com.athenastudios.athenacore'
+archivesBaseName = 'athenacore'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    options.encoding = 'UTF-8'
+}
+
+minecraft {
+    version = '1.12.2-14.23.5.2860'
+    runDir = 'run'
+    mappings = 'stable_39'
+}
+
+jar {
+    manifest {
+        attributes([
+            'Specification-Title'   : 'AthenaCore',
+            'Specification-Version' : '1.0.0',
+            'Implementation-Title'  : 'AthenaCore',
+            'Implementation-Version': '1.0.0'
+        ])
+    }
+}

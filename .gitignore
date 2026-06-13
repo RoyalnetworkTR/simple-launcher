@@ -393,7 +393,25 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+*.wixpdb
+
+# Athena: geçici ekran görüntüleri
+tools/_*.png
 
 # JetBrains Rider
 *.sln.iml
 WebBackend/files
+
+# Athena backend runtime data (SQLite DB, pack state, changelog, admin password)
+WebBackend/data/*
+!WebBackend/data/.gitkeep
+!WebBackend/data/.env.example
+
+# Claude Code local session/settings (not for the repo)
+.claude/
+
+# Secrets / local auth state (never commit)
+**/auth.key
+**/auth.dat
+**/*.env
+!**/*.env.example
