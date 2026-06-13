@@ -2,14 +2,15 @@ package com.athenastudios.athenacore.util;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.client.Minecraft;
+import net.minecraftforge.fml.common.Loader;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 /**
- * Reads the launcher-written config/athena_session.json from the game directory.
+ * Reads the launcher-written config/athena_session.json. Loader.getConfigDir()
+ * returns the game's config/ directory (mapping-independent across MCP versions).
  * Format: { "join_token": "...", "username": "...", "uuid": "...", "expires_at": 123 }
  */
 public final class SessionFile {
@@ -18,8 +19,7 @@ public final class SessionFile {
 
     public static String readToken() {
         try {
-            File dir = Minecraft.getMinecraft().mcDataDir;
-            File f = new File(dir, "config/athena_session.json");
+            File f = new File(Loader.instance().getConfigDir(), "athena_session.json");
             if (!f.isFile()) {
                 return null;
             }
