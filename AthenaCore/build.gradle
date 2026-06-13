@@ -5,10 +5,11 @@
 // forge-1.12.2-...-userdev.jar). Built in CI (.github/workflows/athenacore-mod.yml).
 
 buildscript {
+    // The anatawa12 ForgeGradle 2.3 fork is published on Maven Central and fixes
+    // Forge 1.12.2 userdev resolution against the modern Forge maven.
     repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.anatawa12.com/snapshot/' }
         mavenCentral()
+        maven { name = 'forge'; url = 'https://maven.minecraftforge.net' }
     }
     dependencies {
         classpath('com.anatawa12.forge:ForgeGradle:2.3-1.0.+') { changing = true }
@@ -16,20 +17,6 @@ buildscript {
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
-
-// Forge 1.12.2 userdev ships under the "userdev3" classifier on the modern Forge
-// maven. Declare the repo at project level with artifact-based metadata so Gradle
-// can resolve it (the auto-added legacy files.minecraftforge.net repo is dead).
-repositories {
-    maven {
-        url = 'https://maven.minecraftforge.net'
-        metadataSources {
-            mavenPom()
-            artifact()
-        }
-    }
-    mavenCentral()
-}
 
 version = '1.0.0'
 group = 'com.athenastudios.athenacore'

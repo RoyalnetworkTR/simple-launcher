@@ -1,0 +1,131 @@
+# Athena Studios Launcher - Apache 2.4 + PHP-FPM virtual host (sample)
+# =============================================================================
+# nginx.conf.sample'in Apache karşılığı. Sunucuya kurarken şunları ayarlayın:
+#   - ServerName     -> oyna.athenastudios.com.tr
+#   - DocumentRoot   -> WebBackend/public'in MUTLAK yolu (public, WebBackend DEĞİL)
+#   - SetHandler     -> PHP-FPM soketiniz (PHP 8.4: /run/php/php8.4-fpm.sock)
+#
+# Gerekli Apache modülleri (deploy-apache.sh bunları otomatik etkinleştirir):
+#   a2enmod proxy proxy_fcgi rewrite headers setenvif ssl
+#
+# Front-controller deseni: gerçek bir dosya/dizine denk gelmeyen her istek
+# public/index.php'ye yönlendirilir; yönlendirme içeride yapılır.
+#
+# KURULUM SIRASI (HTTPS):
+#   1) Bu dosyayı /etc/apache2/sites-available/athena.conf olarak koyun.
+#   2) a2ensite athena && a2dissite 000-default && systemctl reload apache2
+#   3) certbot --apache -d oyna.athenastudios.com.tr --redirect
+#      -> certbot otomatik olarak athena-le-ssl.conf (:443) üretir ve 80->443
+#         yönlendirmesini ekler. Aşağıdaki :443 bloğunu ELLE açmanıza gerek yok.
+# =============================================================================
+
+<VirtualHost *:80>
+    ServerName oyna.athenastudios.com.tr
+
+    # ÖNEMLİ: WebBackend/public'i gösterin (WebBackend'in kendisini DEĞİL).
+    DocumentRoot /var/www/html/public
+
+    # Skin/dosya yüklemeleri için makul gövde sınırı (skinler ufak; 50M bol bol yeter).
+    LimitRequestBody 52428800
+
+    <Directory /var/www/html/public>
+        Options -Indexes +FollowSymLinks
+        # Her şeyi vhost içine yazdığımız için .htaccess'e gerek yok (daha hızlı).
+        AllowOverride None
+        Require all granted
+
+        # --- KRİTİK: Bearer JWT'yi PHP'ye geçir ---
+        # Apache, FastCGI'ye giderken Authorization başlığını varsayılan olarak
+        # düşürür. Launcher /api/accounts, /api/join/prepare vb. uçlara JWT'yi
+        # bu başlıkla yollar; geçmezse 401 alırsınız. (Apache 2.4.13+)
+        CGIPassAuth On
+
+        # Front controller: gerçek dosya/dizin ise doğrudan servis et, gerisi index.php'ye.
+        RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} -f [OR]
+        RewriteCond %{REQUEST_FILENAME} -d
+        RewriteRule ^ - [L]
+        RewriteRule ^ index.php [L]
+    </Directory>
+
+    # CGIPassAuth desteklenmeyen eski Apache için yedek (zararsız, ikisi birlikte olur):
+    SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
+
+    # .php isteklerini PHP-FPM'e proxy'le (soketinizi buraya göre düzeltin).
+    <FilesMatch "\.php$">
+        SetHandler "proxy:unix:/run/php/php8.4-fpm.sock|fcgi://localhost"
+    </FilesMatch>
+
+    # Defans-derinliği: public dışında olsalar bile backend iç dizinleri ASLA servis edilmesin.
+    RedirectMatch 404 "(?i)^/(data|seed|src|cli)(/|$)"
+
+    # Gizli dosyalar (dotfile) ve editör yedekleri (foo~) reddedilir.
+    <FilesMatch "(^\.ht|~$)">
+        Require all denied
+    </FilesMatch>
+
+    # Güvenlik başlıkları (mod_headers).
+    ServerSignature Off
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set X-XSS-Protection "1; mode=block"
+
+    ErrorLog  ${APACHE_LOG_DIR}/athena_error.log
+    CustomLog ${APACHE_LOG_DIR}/athena_access.log combined
+</VirtualHost>
+
+# =============================================================================
+# Aşağıdaki :443 bloğunu certbot OTOMATİK üretir (athena-le-ssl.conf).
+# Sadece certbot kullanmayıp TLS'i elle yönetmek isterseniz şablon olarak açın:
+# =============================================================================
+#
+# <VirtualHost *:443>
+#     ServerName oyna.athenastudios.com.tr
+#     DocumentRoot /var/www/html/public
+#     LimitRequestBody 52428800
+#
+#     SSLEngine on
+#     SSLCertificateFile    /etc/letsencrypt/live/oyna.athenastudios.com.tr/fullchain.pem
+#     SSLCertificateKeyFile /etc/letsencrypt/live/oyna.athenastudios.com.tr/privkey.pem
+#     # Include /etc/letsencrypt/options-ssl-apache.conf
+#
+#     <Directory /var/www/html/public>
+#         Options -Indexes +FollowSymLinks
+#         AllowOverride None
+#         Require all granted
+#         CGIPassAuth On
+#         RewriteEngine On
+#         RewriteCond %{REQUEST_FILENAME} -f [OR]
+#         RewriteCond %{REQUEST_FILENAME} -d
+#         RewriteRule ^ - [L]
+#         RewriteRule ^ index.php [L]
+#     </Directory>
+#
+#     SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
+#     <FilesMatch "\.php$">
+#         SetHandler "proxy:unix:/run/php/php8.4-fpm.sock|fcgi://localhost"
+#     </FilesMatch>
+#     RedirectMatch 404 "(?i)^/(data|seed|src|cli)(/|$)"
+#     <FilesMatch "(^\.ht|~$)">
+#         Require all denied
+#     </FilesMatch>
+#
+#     ServerSignature Off
+#     Header always set Strict-Transport-Security "max-age=31536000"
+#     Header always set X-Content-Type-Options "nosniff"
+#     Header always set X-Frame-Options "DENY"
+#     Header always set Referrer-Policy "no-referrer"
+#     Header always set X-XSS-Protection "1; mode=block"
+#
+#     ErrorLog  ${APACHE_LOG_DIR}/athena_ssl_error.log
+#     CustomLog ${APACHE_LOG_DIR}/athena_ssl_access.log combined
+# </VirtualHost>
+#
+# # 80 -> 443 yönlendirme (certbot --redirect bunu da otomatik ekler):
+# <VirtualHost *:80>
+#     ServerName oyna.athenastudios.com.tr
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </VirtualHost>
