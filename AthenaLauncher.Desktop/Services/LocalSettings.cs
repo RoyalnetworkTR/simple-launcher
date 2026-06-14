@@ -16,6 +16,9 @@ public class LocalSettings
     public string JvmArguments { get; set; } = "";
     public string EnabledOptionalMods { get; set; } = "";
     public int SelectedAccountId { get; set; } = -1;
+    /// <summary>When true (default), the launcher auto-joins the server on launch
+    /// if the backend's AutoConnect is also on. The user can turn this off here.</summary>
+    public bool AutoConnectOnLaunch { get; set; } = true;
 
     private static string Dir =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppConfig.AppDataFolder);

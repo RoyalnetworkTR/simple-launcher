@@ -230,12 +230,19 @@ public class LauncherCore
         if (!joinReady)
             Status?.Invoke("Uyarı: oturum doğrulaması hazırlanamadı (giriş gerekebilir).");
 
+        // Register the Athena server in the in-game multiplayer list (servers.dat),
+        // independent of auto-connect, so players can always find it.
+        ServersDat.WriteOrMerge(PackageDir, "Athena Studios", Config.ServerIp);
+
+        // Auto-join only when BOTH the backend allows it and the user hasn't
+        // disabled it in launcher settings.
+        bool autoJoin = Config.AutoConnect && _settings.AutoConnectOnLaunch;
         var launchOption = new MLaunchOption
         {
             Session = MSession.CreateOfflineSession(account.Username),
             MaximumRamMb = maxRam,
             MinimumRamMb = minRam,
-            ServerIp = Config.AutoConnect ? Config.ServerIp : null
+            ServerIp = autoJoin ? Config.ServerIp : null
         };
         if (!string.IsNullOrEmpty(javaPath)) launchOption.JavaPath = javaPath;
         if (!string.IsNullOrWhiteSpace(_settings.JvmArguments))

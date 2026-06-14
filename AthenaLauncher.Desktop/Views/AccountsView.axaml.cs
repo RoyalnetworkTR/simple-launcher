@@ -73,11 +73,10 @@ public partial class AccountsView : UserControl
         selBtn.Click += (_, _) => AccountChosen?.Invoke(a);
         var skinBtn = new Button { Classes = { "ghost" }, Content = "Skin Yükle" };
         skinBtn.Click += async (_, _) => await UploadSkinAsync(a);
-        var delBtn = new Button { Classes = { "danger" }, Content = "Sil" };
-        delBtn.Click += async (_, _) => { await _auth.DeleteAccountAsync(a.Id); await RefreshAsync(); };
+        // Hesap silme kaldırıldı: kullanıcılar 5 isim haklarını silemez; yalnız
+        // yöneticiler web panelinden siler (backend de DELETE /api/accounts'u 403'ler).
         btns.Children.Add(selBtn);
         btns.Children.Add(skinBtn);
-        btns.Children.Add(delBtn);
         Grid.SetColumn(btns, 1);
         grid.Children.Add(btns);
 

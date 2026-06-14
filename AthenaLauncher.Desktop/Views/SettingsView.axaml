@@ -28,6 +28,14 @@
                 </StackPanel>
             </Border>
 
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Sunucu" FontWeight="SemiBold" />
+                    <CheckBox x:Name="AutoConnectBox" Content="Başlatınca sunucuya otomatik bağlan" />
+                    <TextBlock Classes="muted" Text="Kapatırsanız oyun ana menüde açılır; sunucu yine çoklu oyuncu listesinde görünür." />
+                </StackPanel>
+            </Border>
+
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <Button Classes="accent" Content="Kaydet" Click="OnSave" />
                 <TextBlock x:Name="SaveStatus" Classes="muted" VerticalAlignment="Center" />

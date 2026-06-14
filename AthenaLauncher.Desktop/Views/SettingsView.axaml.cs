@@ -21,6 +21,7 @@ public partial class SettingsView : UserControl
         MinSlider.Value = _settings.MinRamMb;
         JavaBox.Text = _settings.JavaPath;
         JvmBox.Text = _settings.JvmArguments;
+        AutoConnectBox.IsChecked = _settings.AutoConnectOnLaunch;
         UpdateLabels();
 
         MaxSlider.PropertyChanged += (_, e) => { if (e.Property == Slider.ValueProperty) UpdateLabels(); };
@@ -60,6 +61,7 @@ public partial class SettingsView : UserControl
         _settings.MinRamMb = min;
         _settings.JavaPath = JavaBox.Text ?? "";
         _settings.JvmArguments = JvmBox.Text ?? "";
+        _settings.AutoConnectOnLaunch = AutoConnectBox.IsChecked ?? true;
         _settings.Save();
         SaveStatus.Text = "Kaydedildi ✓";
     }
