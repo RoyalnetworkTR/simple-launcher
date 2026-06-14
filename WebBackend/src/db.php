@@ -164,6 +164,148 @@ function init_db(): void
             count INTEGER NOT NULL DEFAULT 0
         )
     ');
+
+    // ----- Admin panel RBAC (roles + break-glass local account) -----
+
+    // Panel roles keyed by Discord id. SEPARATE from discord_users on purpose:
+    // a role can be granted before that person ever logs into the launcher, and
+    // authorization is distinct from the launcher identity record.
+    $pdo->exec('
+        CREATE TABLE IF NOT EXISTS admin_roles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            discord_id TEXT UNIQUE NOT NULL,
+            role TEXT NOT NULL,                 -- moderator | admin | kurucu
+            granted_by TEXT,                    -- granter discord_id or "system"
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ');
+
+    // Break-glass local admin login (username + password). Used when Discord
+    // OAuth is unavailable; generated once and bound to the kurucu role.
+    $pdo->exec('
+        CREATE TABLE IF NOT EXISTS admin_local (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL COLLATE NOCASE,
+            pass_hash TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT \'kurucu\',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            last_login DATETIME
+        )
+    ');
+
+    // Founder is always kurucu (idempotent + self-healing on every boot).
+    if (defined('ATHENA_FOUNDER_DISCORD_ID') && ATHENA_FOUNDER_DISCORD_ID !== '') {
+        seed_founder_role((string) ATHENA_FOUNDER_DISCORD_ID);
+    }
+}
+
+// ===========================================================================
+// Admin RBAC: roles
+// ===========================================================================
+
+/** Valid panel roles, ordered weakest -> strongest. */
+function admin_valid_roles(): array
+{
+    return ['moderator', 'admin', 'kurucu'];
+}
+
+/** The role string for a Discord id, or null if that id has no panel role. */
+function admin_role_for_discord(string $discordId): ?string
+{
+    if ($discordId === '') {
+        return null;
+    }
+    $stmt = db()->prepare('SELECT role FROM admin_roles WHERE discord_id = :d LIMIT 1');
+    $stmt->execute([':d' => $discordId]);
+    $row = $stmt->fetch();
+    return $row === false ? null : (string) $row['role'];
+}
+
+/** Grant/replace a panel role for a Discord id. Role must be pre-validated. */
+function set_admin_role(string $discordId, string $role, string $grantedBy): void
+{
+    db()->prepare('
+        INSERT INTO admin_roles (discord_id, role, granted_by)
+        VALUES (:d, :r, :g)
+        ON CONFLICT(discord_id) DO UPDATE SET role = excluded.role, granted_by = excluded.granted_by
+    ')->execute([':d' => $discordId, ':r' => $role, ':g' => $grantedBy]);
+}
+
+/** Remove a panel role (guards — founder / last-kurucu — live at the call site). */
+function revoke_admin_role(string $discordId): void
+{
+    db()->prepare('DELETE FROM admin_roles WHERE discord_id = :d')->execute([':d' => $discordId]);
+}
+
+/** Founder seed: always kurucu, idempotent and self-healing. */
+function seed_founder_role(string $founderDiscordId): void
+{
+    if ($founderDiscordId === '') {
+        return;
+    }
+    db()->prepare('
+        INSERT INTO admin_roles (discord_id, role, granted_by)
+        VALUES (:d, \'kurucu\', \'system\')
+        ON CONFLICT(discord_id) DO UPDATE SET role = \'kurucu\'
+    ')->execute([':d' => $founderDiscordId]);
+}
+
+/** Number of kurucu-role holders (Discord roles only). */
+function count_kurucu(): int
+{
+    return (int) db()->query("SELECT COUNT(*) FROM admin_roles WHERE role = 'kurucu'")->fetchColumn();
+}
+
+/** All panel roles with the linked Discord display name (newest first). */
+function admin_all_roles(): array
+{
+    $sql = 'SELECT r.discord_id, r.role, r.granted_by, r.created_at, d.username AS discord_username
+            FROM admin_roles r
+            LEFT JOIN discord_users d ON d.discord_id = r.discord_id
+            ORDER BY CASE r.role WHEN \'kurucu\' THEN 0 WHEN \'admin\' THEN 1 ELSE 2 END, r.id ASC';
+    return db()->query($sql)->fetchAll();
+}
+
+// ===========================================================================
+// Admin RBAC: break-glass local account
+// ===========================================================================
+
+function get_admin_local(string $username): ?array
+{
+    $stmt = db()->prepare('SELECT * FROM admin_local WHERE username = :u COLLATE NOCASE LIMIT 1');
+    $stmt->execute([':u' => $username]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+function get_admin_local_by_id(int $id): ?array
+{
+    $stmt = db()->prepare('SELECT * FROM admin_local WHERE id = :id LIMIT 1');
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+function create_admin_local(string $username, string $passHash, string $role = 'kurucu'): int
+{
+    db()->prepare('INSERT INTO admin_local (username, pass_hash, role) VALUES (:u, :p, :r)')
+        ->execute([':u' => $username, ':p' => $passHash, ':r' => $role]);
+    return (int) db()->lastInsertId();
+}
+
+function touch_admin_local_login(int $id): void
+{
+    db()->prepare('UPDATE admin_local SET last_login = CURRENT_TIMESTAMP WHERE id = :id')->execute([':id' => $id]);
+}
+
+function admin_local_count(): int
+{
+    return (int) db()->query('SELECT COUNT(*) FROM admin_local')->fetchColumn();
+}
+
+function delete_all_admin_local(): void
+{
+    db()->exec('DELETE FROM admin_local');
 }
 
 /**

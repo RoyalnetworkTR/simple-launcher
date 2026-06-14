@@ -51,6 +51,58 @@ function discord_exchange_code(string $code): ?array
     return is_array($data) ? $data : null;
 }
 
+// ---------------------------------------------------------------------------
+// Admin panel OAuth - a SECOND, dedicated redirect_uri so the panel's web
+// session flow is fully separate from the launcher's loopback flow. Discord
+// requires redirect_uri to match exactly between authorize and token exchange,
+// so the admin flow carries its own URI end-to-end. The launcher functions
+// above are untouched.
+// ---------------------------------------------------------------------------
+
+function discord_admin_redirect_uri(): ?string
+{
+    return env_get('DISCORD_ADMIN_REDIRECT_URI');
+}
+
+/** True only when client id, secret AND the admin redirect URI are configured. */
+function discord_admin_oauth_configured(): bool
+{
+    return env_get('DISCORD_CLIENT_ID') !== null
+        && env_get('DISCORD_CLIENT_SECRET') !== null
+        && discord_admin_redirect_uri() !== null;
+}
+
+function discord_admin_authorize_url(string $state): string
+{
+    $params = http_build_query([
+        'response_type' => 'code',
+        'client_id'     => (string) env_get('DISCORD_CLIENT_ID'),
+        'scope'         => 'identify',
+        'redirect_uri'  => (string) discord_admin_redirect_uri(),
+        'state'         => $state,
+        'prompt'        => 'consent',
+    ]);
+    return 'https://discord.com/oauth2/authorize?' . $params;
+}
+
+/** Exchange an authorization code (admin redirect_uri) for tokens; decoded JSON or null. */
+function discord_admin_exchange_code(string $code): ?array
+{
+    $body = http_build_query([
+        'grant_type'    => 'authorization_code',
+        'code'          => $code,
+        'redirect_uri'  => (string) discord_admin_redirect_uri(),
+        'client_id'     => (string) env_get('DISCORD_CLIENT_ID'),
+        'client_secret' => (string) env_get('DISCORD_CLIENT_SECRET'),
+    ]);
+    $res = athena_http_post_form('https://discord.com/api/oauth2/token', $body);
+    if ($res === null) {
+        return null;
+    }
+    $data = json_decode($res, true);
+    return is_array($data) ? $data : null;
+}
+
 /** Fetch the authenticated user's profile (id, username, avatar, ...). */
 function discord_fetch_me(string $accessToken): ?array
 {

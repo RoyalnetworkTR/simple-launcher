@@ -17,10 +17,19 @@ require_once __DIR__ . '/../src/mrpack.php';
 require_once __DIR__ . '/../src/admin.php';
 require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/discord.php';
+require_once __DIR__ . '/../src/admin_auth.php';
 require_once __DIR__ . '/../src/skins.php';
 require_once __DIR__ . '/../src/uuid.php';
 
 init_db();
+
+// Seed the one-time break-glass admin on first boot (after the schema exists).
+// Never let a write hiccup 500 the whole API.
+try {
+    ensure_breakglass_account();
+} catch (Throwable $e) {
+    // ignore - founder Discord login still works
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -93,17 +102,6 @@ function ext_to_mime(string $path): string
     return $map[$ext] ?? 'application/octet-stream';
 }
 
-function require_admin(): void
-{
-    $pw = $_GET['password'] ?? ($_POST['password'] ?? '');
-    if (!is_string($pw) || !hash_equals(ADMIN_PASSWORD, $pw)) {
-        http_response_code(403);
-        header('Content-Type: text/plain; charset=utf-8');
-        echo 'Access Denied.';
-        exit;
-    }
-}
-
 function is_trusted_proxy(string $ip): bool
 {
     if ($ip === '') {
@@ -148,6 +146,109 @@ $path   = '/' . ltrim($path, '/');
 // Normalize trailing slash (except root).
 if ($path !== '/' && substr($path, -1) === '/') {
     $path = rtrim($path, '/');
+}
+
+// ===========================================================================
+// Admin panel - session login (root) + auth flows
+// ===========================================================================
+
+// ---- GET / or /admin : login page (logged out) or dashboard (logged in) ----
+if ($method === 'GET' && ($path === '/' || $path === '/admin')) {
+    admin_session_start();
+    $admin = current_admin();
+    header('Content-Type: text/html; charset=utf-8');
+    echo $admin === null ? render_admin_login(csrf_token()) : render_admin($admin, csrf_token());
+    exit;
+}
+
+// ---- GET /api/admin/auth/discord/start ----
+if ($method === 'GET' && $path === '/api/admin/auth/discord/start') {
+    admin_session_start();
+    if (!discord_admin_oauth_configured() || jwt_secret() === null) {
+        send_html_message('Yapılandırma eksik', 'Discord admin girişi henüz yapılandırılmadı.', 503);
+    }
+    if (!rate_check('admin_login:' . client_ip(), 20, 300)) {
+        send_html_message('Çok fazla deneme', 'Lütfen birkaç dakika sonra tekrar deneyin.', 429);
+    }
+    $nonce = bin2hex(random_bytes(16));
+    $_SESSION['admin_oauth_nonce'] = $nonce;
+    $state = sign_state(['adm' => 1, 'n' => $nonce, 'e' => time() + 600]);
+    header('Location: ' . discord_admin_authorize_url($state));
+    http_response_code(302);
+    exit;
+}
+
+// ---- GET /api/admin/auth/discord/callback ----
+if ($method === 'GET' && $path === '/api/admin/auth/discord/callback') {
+    admin_session_start();
+    $st        = verify_state((string) ($_GET['state'] ?? ''));
+    $code      = (string) ($_GET['code'] ?? '');
+    $nonceSess = (string) ($_SESSION['admin_oauth_nonce'] ?? '');
+    unset($_SESSION['admin_oauth_nonce']);
+    if ($st === null || (int) ($st['adm'] ?? 0) !== 1 || $code === ''
+        || $nonceSess === '' || !hash_equals($nonceSess, (string) ($st['n'] ?? ''))) {
+        send_html_message('Giriş başarısız', 'Geçersiz veya süresi dolmuş istek. Lütfen tekrar deneyin.', 400);
+    }
+    $tok    = discord_admin_exchange_code($code);
+    $access = is_array($tok) ? (string) ($tok['access_token'] ?? '') : '';
+    if ($access === '') {
+        send_html_message('Giriş başarısız', 'Discord doğrulaması tamamlanamadı.', 502);
+    }
+    $me = discord_fetch_me($access);
+    if (!is_array($me) || empty($me['id'])) {
+        send_html_message('Giriş başarısız', 'Discord profili alınamadı.', 502);
+    }
+    $user = upsert_discord_user($me);
+    if ((int) ($user['is_banned'] ?? 0) === 1) {
+        send_html_message('Erişim engellendi', 'Bu Discord hesabı yasaklı.', 403);
+    }
+    $role = admin_role_for_discord((string) $me['id']);
+    if ($role === null) {
+        send_html_message('Yetkisiz', 'Bu Discord hesabının panel yetkisi yok. Bir kurucuya başvurun.', 403);
+    }
+    admin_establish_session([
+        'kind'       => 'discord',
+        'discord_id' => (string) $me['id'],
+        'name'       => (string) ($me['username'] ?? $me['id']),
+    ]);
+    header('Location: /');
+    http_response_code(302);
+    exit;
+}
+
+// ---- POST /api/admin/auth/local (break-glass username/password) ----
+if ($method === 'POST' && $path === '/api/admin/auth/local') {
+    admin_session_start();
+    csrf_check();
+    $ip       = client_ip();
+    $username = trim((string) ($_POST['username'] ?? ''));
+    $password = (string) ($_POST['password'] ?? '');
+    if (!rate_check('local_login_ip:' . $ip, 10, 300)
+        || !rate_check('local_login_user:' . strtolower($username), 10, 900)) {
+        send_html_message('Çok fazla deneme', 'Lütfen birkaç dakika sonra tekrar deneyin.', 429);
+    }
+    $row = admin_local_verify($username, $password);
+    if ($row === null) {
+        http_response_code(401);
+        header('Content-Type: text/html; charset=utf-8');
+        echo render_admin_login(csrf_token(), 'Kullanıcı adı veya parola hatalı.');
+        exit;
+    }
+    touch_admin_local_login((int) $row['id']);
+    admin_establish_session(['kind' => 'local', 'local_id' => (int) $row['id'], 'name' => (string) $row['username']]);
+    header('Location: /');
+    http_response_code(302);
+    exit;
+}
+
+// ---- POST /api/admin/auth/logout ----
+if ($method === 'POST' && $path === '/api/admin/auth/logout') {
+    admin_session_start();
+    csrf_check();
+    admin_logout_session();
+    header('Location: /');
+    http_response_code(302);
+    exit;
 }
 
 // ---- GET /api/server_config.json ----
@@ -317,14 +418,12 @@ if ($method === 'GET' && $path === '/api/check_ban') {
 
 // ---- POST /api/ban ----
 if ($method === 'POST' && $path === '/api/ban') {
-    // Password may arrive via query or JSON body.
+    admin_session_start();
+    csrf_check();
+    require_perm('ban');
+
     $body = json_decode(file_get_contents('php://input') ?: '', true);
     $body = is_array($body) ? $body : [];
-
-    $pw = $_GET['password'] ?? ($body['password'] ?? '');
-    if (!is_string($pw) || !hash_equals(ADMIN_PASSWORD, $pw)) {
-        send_json(['status' => 'error', 'error' => 'unauthorized'], 403);
-    }
 
     $hwid   = isset($body['hwid']) ? trim((string) $body['hwid']) : '';
     $reason = isset($body['reason']) ? (string) $body['reason'] : null;
@@ -338,26 +437,22 @@ if ($method === 'POST' && $path === '/api/ban') {
     send_json(['status' => 'ok', 'action' => $action, 'hwid' => $hwid]);
 }
 
-// ---- GET /admin ----
-if ($method === 'GET' && $path === '/admin') {
-    require_admin();
-    header('Content-Type: text/html; charset=utf-8');
-    echo render_admin();
-    exit;
-}
-
 // ---- POST /api/admin/rebuild ----
 if ($method === 'POST' && $path === '/api/admin/rebuild') {
-    require_admin();
+    admin_session_start();
+    csrf_check();
+    require_perm('index');
     build_index();
-    header('Location: /admin?password=' . rawurlencode((string) ($_GET['password'] ?? $_POST['password'] ?? '')));
+    header('Location: /');
     http_response_code(303);
     exit;
 }
 
 // ---- POST /api/admin/classify ----
 if ($method === 'POST' && $path === '/api/admin/classify') {
-    require_admin();
+    admin_session_start();
+    csrf_check();
+    require_perm('mods');
 
     $types    = isset($_POST['type']) && is_array($_POST['type']) ? $_POST['type'] : [];
     $names    = isset($_POST['name']) && is_array($_POST['name']) ? $_POST['name'] : [];
@@ -387,14 +482,16 @@ if ($method === 'POST' && $path === '/api/admin/classify') {
     write_json(FILES_DIR . '/mods_classification.json', ['mods' => $mods]);
     build_index();
 
-    header('Location: /admin?password=' . rawurlencode((string) ($_GET['password'] ?? $_POST['password'] ?? '')));
+    header('Location: /');
     http_response_code(303);
     exit;
 }
 
 // ---- POST /api/admin/config ----
 if ($method === 'POST' && $path === '/api/admin/config') {
-    require_admin();
+    admin_session_start();
+    csrf_check();
+    require_perm('cfg');
 
     // Preserve any existing keys, overwrite the editable ones.
     $existing = [];
@@ -419,14 +516,16 @@ if ($method === 'POST' && $path === '/api/admin/config') {
 
     write_json($cfgFile, $config);
 
-    header('Location: /admin?password=' . rawurlencode((string) ($_GET['password'] ?? $_POST['password'] ?? '')));
+    header('Location: /');
     http_response_code(303);
     exit;
 }
 
 // ---- POST /api/admin/ban_account ---- (ban/unban by discord id, username, or uuid)
 if ($method === 'POST' && $path === '/api/admin/ban_account') {
-    require_admin();
+    admin_session_start();
+    csrf_check();
+    require_perm('ban');
     $body = request_json();
     if (empty($body)) {
         $body = $_POST;
@@ -460,7 +559,9 @@ if ($method === 'POST' && $path === '/api/admin/ban_account') {
 
 // ---- POST /api/admin/skin ---- (moderation: reset an account's skin, or approve/reject by hash)
 if ($method === 'POST' && $path === '/api/admin/skin') {
-    require_admin();
+    admin_session_start();
+    csrf_check();
+    require_perm('skin');
     $body = request_json();
     if (empty($body)) {
         $body = $_POST;
@@ -475,6 +576,173 @@ if ($method === 'POST' && $path === '/api/admin/skin') {
         send_json(['status' => 'ok', 'action' => $action]);
     }
     send_json(['status' => 'error', 'error' => 'bad request'], 400);
+}
+
+// ---- POST /api/admin/mod/upload ---- (admin: upload a .jar into files/mods/)
+if ($method === 'POST' && $path === '/api/admin/mod/upload') {
+    admin_session_start();
+    csrf_check();
+    require_perm('mods');
+    if (!isset($_FILES['mod']) || ($_FILES['mod']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        send_json(['error' => 'no_file'], 400);
+    }
+    $base = basename(str_replace('\\', '/', (string) ($_FILES['mod']['name'] ?? '')));
+    $base = preg_replace('/[^A-Za-z0-9._-]/', '_', $base);
+    if ($base === '' || strpos($base, '..') !== false) {
+        send_json(['error' => 'bad_name'], 400);
+    }
+    if (!preg_match('/\.jar$/i', $base)) {
+        send_json(['error' => 'not_jar', 'message' => 'Yalnızca .jar dosyaları yüklenebilir.'], 400);
+    }
+    $tmp  = (string) $_FILES['mod']['tmp_name'];
+    $size = (int) ($_FILES['mod']['size'] ?? 0);
+    if ($size <= 0 || $size > 25 * 1024 * 1024) {
+        send_json(['error' => 'bad_size', 'message' => 'Dosya boşsa veya 25MB üzeriyse reddedilir.'], 400);
+    }
+    // Magic bytes: jars are ZIP archives (PK\x03\x04, or PK\x05\x06 for empty).
+    $fh    = @fopen($tmp, 'rb');
+    $magic = $fh ? (string) fread($fh, 4) : '';
+    if ($fh) { fclose($fh); }
+    if (strncmp($magic, "PK\x03\x04", 4) !== 0 && strncmp($magic, "PK\x05\x06", 4) !== 0) {
+        send_json(['error' => 'not_zip', 'message' => 'Geçerli bir .jar (zip) dosyası değil.'], 400);
+    }
+    $modsDir = FILES_DIR . '/mods';
+    if (!is_dir($modsDir)) { @mkdir($modsDir, 0775, true); }
+    $dest = $modsDir . '/' . $base;
+    if (is_file($dest) && empty($_POST['overwrite'])) {
+        send_json(['error' => 'exists', 'message' => 'Bu adda bir mod zaten var. Üzerine yazmak için onaylayın.'], 409);
+    }
+    if (!@move_uploaded_file($tmp, $dest)) {
+        send_json(['error' => 'store_failed'], 500);
+    }
+    @chmod($dest, 0644);
+    build_index();
+    send_json(['status' => 'ok', 'file' => $base]);
+}
+
+// ---- POST /api/admin/mod/delete ---- (admin: remove a .jar from files/mods/)
+if ($method === 'POST' && $path === '/api/admin/mod/delete') {
+    admin_session_start();
+    csrf_check();
+    require_perm('mods');
+    $body = request_json();
+    if (empty($body)) { $body = $_POST; }
+    $file = basename(str_replace('\\', '/', (string) ($body['file'] ?? '')));
+    if ($file === '' || strpos($file, '..') !== false || !preg_match('/\.jar$/i', $file)) {
+        send_json(['error' => 'bad_name'], 400);
+    }
+    $modsDir = FILES_DIR . '/mods';
+    $real = realpath($modsDir . '/' . $file);
+    $baseReal = realpath($modsDir);
+    if ($real === false || $baseReal === false
+        || strncmp($real, $baseReal . DIRECTORY_SEPARATOR, strlen($baseReal) + 1) !== 0
+        || !is_file($real)) {
+        send_json(['error' => 'not_found'], 404);
+    }
+    @unlink($real);
+    $clsFile = FILES_DIR . '/mods_classification.json';
+    $cls = read_json_file($clsFile);
+    if (is_array($cls) && isset($cls['mods'][$file])) {
+        unset($cls['mods'][$file]);
+        write_json($clsFile, $cls);
+    }
+    build_index();
+    send_json(['status' => 'ok', 'file' => $file]);
+}
+
+// ---- POST /api/admin/account/delete ---- (admin: delete a Minecraft account / name slot)
+if ($method === 'POST' && $path === '/api/admin/account/delete') {
+    admin_session_start();
+    csrf_check();
+    require_perm('account_delete');
+    $body = request_json();
+    if (empty($body)) { $body = $_POST; }
+    $id = (int) ($body['account_id'] ?? 0);
+    if ($id <= 0 || get_account($id) === null) {
+        send_json(['error' => 'not_found'], 404);
+    }
+    delete_account($id);
+    send_json(['status' => 'ok']);
+}
+
+// ---- POST /api/admin/role/grant ---- (kurucu: grant a panel role to a Discord id)
+if ($method === 'POST' && $path === '/api/admin/role/grant') {
+    admin_session_start();
+    csrf_check();
+    require_perm('roles');
+    $body = request_json();
+    if (empty($body)) { $body = $_POST; }
+    $discordId = trim((string) ($body['discord_id'] ?? ''));
+    $role      = (string) ($body['role'] ?? '');
+    if (!preg_match('/^\d{5,25}$/', $discordId)) {
+        send_json(['error' => 'bad_discord_id'], 400);
+    }
+    if (!in_array($role, admin_valid_roles(), true)) {
+        send_json(['error' => 'bad_role'], 400);
+    }
+    $me = current_admin();
+    set_admin_role($discordId, $role, (string) ($me['id'] ?? 'system'));
+    send_json(['status' => 'ok', 'discord_id' => $discordId, 'role' => $role]);
+}
+
+// ---- POST /api/admin/role/revoke ---- (kurucu: remove a panel role)
+if ($method === 'POST' && $path === '/api/admin/role/revoke') {
+    admin_session_start();
+    csrf_check();
+    require_perm('roles');
+    $body = request_json();
+    if (empty($body)) { $body = $_POST; }
+    $discordId = trim((string) ($body['discord_id'] ?? ''));
+    if (!preg_match('/^\d{5,25}$/', $discordId)) {
+        send_json(['error' => 'bad_discord_id'], 400);
+    }
+    if ($discordId === (string) ATHENA_FOUNDER_DISCORD_ID) {
+        send_json(['error' => 'founder_protected', 'message' => 'Kurucu rolü kaldırılamaz.'], 409);
+    }
+    if (admin_role_for_discord($discordId) === 'kurucu' && count_kurucu() <= 1) {
+        send_json(['error' => 'last_kurucu', 'message' => 'Son kurucu kaldırılamaz.'], 409);
+    }
+    revoke_admin_role($discordId);
+    send_json(['status' => 'ok', 'discord_id' => $discordId]);
+}
+
+// ---- POST /api/admin/announce ---- (admin: post a manual changelog/announcement note)
+if ($method === 'POST' && $path === '/api/admin/announce') {
+    admin_session_start();
+    csrf_check();
+    require_perm('announce');
+    $body = request_json();
+    if (empty($body)) { $body = $_POST; }
+    $note = trim((string) ($body['note'] ?? ''));
+    $note = (string) preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $note);
+    $note = mb_substr($note, 0, 500);
+    if ($note === '') {
+        send_json(['error' => 'empty_note'], 400);
+    }
+    // Append to changelog WITHOUT touching STATE_PATH (keeps the auto pack-version
+    // counter in sync; refresh_pack() owns STATE_PATH).
+    $state      = function_exists('load_state') ? load_state() : ['version' => 0];
+    $curVersion = (int) ($state['version'] ?? 0);
+    $ts         = gmdate('c');
+    $log = load_changelog();
+    array_unshift($log, [
+        'Version'        => $curVersion,
+        'Timestamp'      => $ts,
+        'Note'           => $note,
+        'Added'          => [],
+        'Updated'        => [],
+        'Removed'        => [],
+        'IsAnnouncement' => true,
+    ]);
+    if (count($log) > 200) { $log = array_slice($log, 0, 200); }
+    write_json(CHANGELOG_PATH, $log);
+    $vi = read_json_file(VERSION_PATH);
+    $vi = is_array($vi) ? $vi : [];
+    $vi['Note']      = $note;
+    $vi['UpdatedAt'] = $ts;
+    if (!isset($vi['Version'])) { $vi['Version'] = $curVersion; }
+    write_json(VERSION_PATH, $vi);
+    send_json(['status' => 'ok', 'note' => $note]);
 }
 
 // ===========================================================================
@@ -599,14 +867,12 @@ if ($method === 'POST' && $path === '/api/accounts') {
 }
 
 // ---- DELETE /api/accounts/{id} ----
+// Disabled: users keep their name slots. Only admins delete accounts via the
+// panel (POST /api/admin/account/delete). Still requires a valid session so it
+// is not an open probe.
 if ($method === 'DELETE' && preg_match('#^/api/accounts/(\d+)$#', $path, $m)) {
-    $auth = require_bearer();
-    $acc = get_account((int) $m[1]);
-    if ($acc === null || (string) $acc['discord_id'] !== $auth['discord_id']) {
-        send_json(['error' => 'not_found'], 404);
-    }
-    delete_account((int) $m[1]);
-    send_json(['status' => 'ok']);
+    require_bearer();
+    send_json(['error' => 'forbidden', 'message' => 'Hesap silme yalnızca yöneticiler tarafından yapılır.'], 403);
 }
 
 // ---- POST /api/accounts/{id}/regenerate-secret ----

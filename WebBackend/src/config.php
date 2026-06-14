@@ -47,11 +47,23 @@ if (!is_dir(DATA_DIR)) {
 if (!is_dir(SKINS_DIR)) {
     @mkdir(SKINS_DIR, 0775, true);
 }
+// Private PHP session storage for the admin panel (never web-accessible: lives
+// under data/ which Apache 404s). Tight perms so only the PHP user can read it.
+define('SESSIONS_DIR', DATA_DIR . '/sessions');
+if (!is_dir(SESSIONS_DIR)) {
+    @mkdir(SESSIONS_DIR, 0700, true);
+}
+@chmod(SESSIONS_DIR, 0700);
 
 // Secrets / feature config loaded from data/.env (gitignored, nginx-blocked).
 require_once __DIR__ . '/env.php';
 // Minecraft accounts allowed per Discord user (clamped to a sane 1-10 range).
 define('ACCOUNT_CAP', max(1, min(10, (int) env_get('ACCOUNT_CAP', '5'))));
+
+// Founder Discord id - always seeded as the 'kurucu' (owner) panel role and can
+// never be locked out. Overridable via .env, but the hardcoded default stands
+// on its own so the founder role survives even without the env key.
+define('ATHENA_FOUNDER_DISCORD_ID', env_get('ATHENA_FOUNDER_DISCORD_ID', '637985724007841812'));
 
 // ---------------------------------------------------------------------------
 // Admin password (never ship a committed/hardcoded password).
